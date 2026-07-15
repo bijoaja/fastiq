@@ -12,30 +12,30 @@ from app.core.responses import ApiErrorResponse, ErrorDetail
 logger = logging.getLogger("app")
 
 class AppException(Exception):
-    def __init__(self, message: str, status_code: int = 400, errors: List[ErrorDetail] = None):
+    def __init__(self, message: str, status_code: int = 400, errors: Optional[List[ErrorDetail]] = None):
         self.message = message
         self.status_code = status_code
         self.errors = errors or []
         super().__init__(message)
 
 class NotFoundException(AppException):
-    def __init__(self, message: str = "Not Found", errors: List[ErrorDetail] = None):
+    def __init__(self, message: str = "Not Found", errors: Optional[List[ErrorDetail]] = None):
         super().__init__(message=message, status_code=404, errors=errors)
 
 class BadRequestException(AppException):
-    def __init__(self, message: str = "Bad Request", errors: List[ErrorDetail] = None):
+    def __init__(self, message: str = "Bad Request", errors: Optional[List[ErrorDetail]] = None):
         super().__init__(message=message, status_code=400, errors=errors)
 
 class UnauthorizedException(AppException):
-    def __init__(self, message: str = "Unauthorized", errors: List[ErrorDetail] = None):
+    def __init__(self, message: str = "Unauthorized", errors: Optional[List[ErrorDetail]] = None):
         super().__init__(message=message, status_code=401, errors=errors)
 
 class ForbiddenException(AppException):
-    def __init__(self, message: str = "Forbidden", errors: List[ErrorDetail] = None):
+    def __init__(self, message: str = "Forbidden", errors: Optional[List[ErrorDetail]] = None):
         super().__init__(message=message, status_code=403, errors=errors)
 
 class ConflictException(AppException):
-    def __init__(self, message: str = "Conflict", errors: List[ErrorDetail] = None):
+    def __init__(self, message: str = "Conflict", errors: Optional[List[ErrorDetail]] = None):
         super().__init__(message=message, status_code=409, errors=errors)
 
 
