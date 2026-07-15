@@ -2,26 +2,46 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository status
+## Commands
 
-**No code has been written yet.** This repository currently contains only `PRD.md` (the full product spec) and an empty `README.md`. There is no `pyproject.toml`, `requirements.txt`, `app/` directory, tests, or Docker setup yet — none of the build/lint/test commands below exist until they are scaffolded.
+### Environment & Run
+- Setup dependencies: `uv sync`
+- Start local development server (with hot reload): `uv run uvicorn app.main:app --reload --port 8000`
+- Run shell commands in virtual environment: `uv run <command>`
 
-When asked to start implementing FastIQ, treat `PRD.md` as the single source of truth for structure and conventions — do not invent alternative layouts. Follow the MVP Roadmap in PRD.md §21 (Phase 1 → Foundation, Phase 2 → DX, Phase 3 → Production Ready) for build order rather than implementing everything at once.
+### Database & Migrations
+- Generate migration: `uv run alembic revision --autogenerate -m "<description>"`
+- Run migrations: `uv run alembic upgrade head`
+- Rollback last migration: `uv run alembic downgrade -1`
+- Seed database: `uv run python app/scripts/seed.py`
 
-## What FastIQ is
+### Testing
+- Run all tests: `uv run pytest`
+- Run with verbose output: `uv run pytest -v`
+- Run specific test file: `uv run pytest tests/test_smoke.py`
 
-FastIQ is an opinionated **project template/starter kit** for FastAPI (not a framework), modeled after an existing Flask template called FlaskIQ. Its stated non-goals matter as much as its goals — it deliberately excludes: admin dashboard, code/ORM generators, OAuth providers, Celery/background workers, event-driven architecture, and microservice tooling. Don't add these unless explicitly asked.
+### Docker
+- Run development stack (Postgres + API dev with hot-reload & volume mount):
+  `docker compose -f docker-compose.dev.yml up --build`
+- Run production stack (Postgres + API production build & healthcheck):
+  `docker compose -f docker-compose.yml up --build`
 
-## Planned tech stack (per PRD.md §5)
+---
 
-- FastAPI + Uvicorn
-- SQLAlchemy 2.x + Alembic (migrations)
-- Pydantic + Pydantic Settings (config)
-- JWT for auth, passwords hashed, UUIDv7 for IDs
-- Pytest for testing
-- Poetry or `uv` for dependency management (undecided — check for a lockfile/`pyproject.toml` before assuming which one is in use)
+## Repository Status & Tech Stack
 
-## Architecture (per PRD.md §6-§9)
+FastIQ is implemented and configured with the following tech stack:
+- **FastAPI** + **Uvicorn** (REST API)
+- **SQLAlchemy 2.x** (Async engine with `asyncpg` / `aiosqlite` for tests)
+- **Alembic** (Database migrations)
+- **Pydantic v2** + **Pydantic Settings** (Configuration & validation)
+- **Pytest** + **Pytest-Asyncio** (Testing)
+- **uv** (Package & environment manager)
+- **Docker & Docker Compose** (Development & production deployment configurations)
+
+---
+
+## Architecture
 
 The core rule: **models are centralized, business logic is modularized.**
 
@@ -30,32 +50,30 @@ app/
 ├── main.py
 ├── config/         # settings.py, database.py, logger.py, security.py, constants.py
 ├── core/           # exceptions.py, responses.py, pagination.py, dependencies.py, enums.py, middleware.py
-├── models/         # ALL SQLAlchemy ORM models live here (not inside modules) — keeps Alembic autodetect and cross-model relations simple
-├── modules/        # one folder per business feature: users/, products/, orders/...
+├── models/         # ALL SQLAlchemy ORM models live here (keeps Alembic autodetect and cross-model relations simple)
+├── modules/        # one folder per business feature: users/, products/, etc.
 │   └── <feature>/
-│       ├── router.py       # HTTP layer only — request in, validate, call service, return response. No business logic here.
-│       ├── service.py      # business logic (create/update/login/register/etc.)
-│       ├── repository.py   # all DB access (find_by_id, create, update, delete...)
+│       ├── router.py       # HTTP layer only — request in, validate, call service, return response
+│       ├── service.py      # business logic (create/update/etc.)
+│       ├── repository.py   # all DB access (find_by_id, create, etc.)
 │       └── schemas.py      # Pydantic request/response schemas for this module
-├── scripts/        # seed.py, seeders/, commands.py
-├── templates/      # Jinja templates, e.g. for emails (kept even though this is API-first)
-└── tests/          # unit/, integration/, conftest.py
+├── scripts/        # seed.py, seeders/
+├── templates/      # Jinja templates (e.g. for emails)
+└── tests/          # pytest tests
 ```
 
-Strict separation of concerns: **router → service → repository**. Routers never touch the database or contain business rules; that's what makes new modules pluggable without touching core architecture (see PRD.md "Success Criteria").
+Strict separation of concerns: **router → service → repository**. Routers never touch the database or contain business rules.
 
-## Conventions to enforce in generated code
+---
 
-- **Response envelope** — every endpoint returns this shape (PRD.md §10):
-  - Success: `{"success": true, "message": "Success", "data": {...}}`
-  - List: same plus `"pagination": {...}`
-  - Error: `{"success": false, "message": "...", "errors": [{"field": "...", "message": "..."}]}`
-- **Pagination** shape: `{"page", "per_page", "total", "total_pages"}` (PRD.md §11).
-- **Exceptions are handled globally** (core/exceptions.py) — don't write per-endpoint try/except for validation, DB, not-found, auth, or 500 errors; add cases to the global handler instead.
-- **Logging** is structured, includes request ID, method, path, duration, status; supports console + file output (PRD.md §13).
-- **Security dependencies** (current user, role, optional permission checks) belong in `core/dependencies.py` / `config/security.py`, not scattered per-module.
+## Conventions to Enforce
+
+- **Response envelope** — every endpoint returns this shape:
+  - Success: `{"success": true, "message": "Success", "data": {...}}` (via `ApiResponse`)
+  - List: same plus `"pagination": {...}` (via `ApiListResponse` and `PaginationInfo`)
+  - Error: `{"success": false, "message": "...", "errors": [{"field": "...", "message": "..."}]}` (via `ApiErrorResponse`)
+- **Pagination** shape: `{"page", "per_page", "total", "total_pages"}`.
+- **Exceptions are handled globally** (`core/exceptions.py`) — raise subclass of `AppException` (e.g., `NotFoundException`, `BadRequestException`) from services. Do not write per-endpoint try/except blocks.
+- **Logging** is structured and logs request details, exception traceback, duration, status, and custom request ID injected by middleware. Console and File (`logs/app.log`) outputs are configured.
+- **Dependency Injection** handles DB session (`get_db`) and service/repository creation in `core/dependencies.py`.
 - Adding a new business feature should only require adding a `modules/<name>/` folder (router/service/repository/schemas) — it should never require touching `core/`.
-
-## Docker (planned, PRD.md §19)
-
-Two compose files with distinct intents: `docker-compose.dev.yml` (hot reload, volume mounts, Postgres + optional Redis) and `docker-compose.yml` for production (multi-stage build, non-root user, healthcheck).
