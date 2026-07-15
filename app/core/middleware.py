@@ -21,7 +21,12 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         start_time = time.perf_counter()
         try:
             response = await call_next(request)
-        except Exception:
+        except Exception as e:
+            duration = time.perf_counter() - start_time
+            logger.error(
+                f"Method: {request.method} | Path: {request.url.path} | "
+                f"Duration: {duration:.4f}s | Status: 500 | Error: {str(e)}"
+            )
             # Clean up context var even on failure
             request_id_ctx.reset(token)
             raise
