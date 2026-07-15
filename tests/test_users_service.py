@@ -9,7 +9,9 @@ from app.modules.users.service import UserService
 
 @pytest.fixture
 def mock_db_session():
-    return AsyncMock()
+    session = AsyncMock()
+    session.add = MagicMock()
+    return session
 
 @pytest.fixture
 def user_repository(mock_db_session):
