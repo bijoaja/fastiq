@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, MagicMock
@@ -32,7 +32,7 @@ def test_health_check(client):
 
 def test_create_user_success(client, mock_user_service):
     user_id = uuid.uuid4()
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     # Mock service.create_user to return a User model
     mock_user = User(
         id=user_id,
@@ -77,7 +77,7 @@ def test_create_user_validation_error(client):
 
 def test_get_user_success(client, mock_user_service):
     user_id = uuid.uuid4()
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     mock_user = User(
         id=user_id,
         email="john@example.com",
@@ -110,7 +110,7 @@ def test_get_user_not_found(client, mock_user_service):
 def test_list_users_success(client, mock_user_service):
     user_id_1 = uuid.uuid4()
     user_id_2 = uuid.uuid4()
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     mock_users = [
         User(id=user_id_1, email="one@example.com", name="User One", created_at=now, updated_at=now),
         User(id=user_id_2, email="two@example.com", name="User Two", created_at=now, updated_at=now)
