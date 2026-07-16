@@ -1,10 +1,11 @@
 import uuid
 from fastapi import APIRouter, Depends, Query
-from app.core.dependencies import get_user_service
+from app.core.dependencies import get_user_service, get_current_user
 from app.core.responses import ApiResponse, ApiListResponse
 from app.core.pagination import build_pagination_info
 from app.modules.users.schemas import CreateUserRequest, UserResponse
 from app.modules.users.service import UserService
+from app.models.user import User
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -17,6 +18,12 @@ async def create_user(
     # Convert ORM to UserResponse
     response_data = UserResponse.model_validate(user)
     return ApiResponse(data=response_data)
+
+@router.get("/me", response_model=ApiResponse[UserResponse])
+async def get_current_user_profile(
+    current_user: User = Depends(get_current_user),
+) -> ApiResponse[UserResponse]:
+    return ApiResponse(data=UserResponse.model_validate(current_user))
 
 @router.get("/{user_id}", response_model=ApiResponse[UserResponse])
 async def get_user(
