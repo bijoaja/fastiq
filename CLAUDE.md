@@ -51,7 +51,7 @@ app/
 ├── config/         # settings.py, database.py, logger.py, security.py, constants.py
 ├── core/           # exceptions.py, responses.py, pagination.py, dependencies.py, enums.py, middleware.py
 ├── models/         # ALL SQLAlchemy ORM models live here (keeps Alembic autodetect and cross-model relations simple)
-├── modules/        # one folder per business feature: users/, products/, etc.
+├── modules/        # one folder per business feature: users/, auth/, etc.
 │   └── <feature>/
 │       ├── router.py       # HTTP layer only — request in, validate, call service, return response
 │       ├── service.py      # business logic (create/update/etc.)
@@ -76,4 +76,6 @@ Strict separation of concerns: **router → service → repository**. Routers ne
 - **Exceptions are handled globally** (`core/exceptions.py`) — raise subclass of `AppException` (e.g., `NotFoundException`, `BadRequestException`) from services. Do not write per-endpoint try/except blocks.
 - **Logging** is structured and logs request details, exception traceback, duration, status, and custom request ID injected by middleware. Console and File (`logs/app.log`) outputs are configured.
 - **Dependency Injection** handles DB session (`get_db`) and service/repository creation in `core/dependencies.py`.
+- **Authentication & Security** — Use JWT access tokens (short-lived) and database-stored hashed refresh tokens. Enforce authentication on routes using the `get_current_user` dependency: `current_user: User = Depends(get_current_user)`.
+- **Unauthorized Errors** — Raise `UnauthorizedException` (e.g. from invalid tokens) to automatically return a standardized 401 error envelope.
 - Adding a new business feature should only require adding a `modules/<name>/` folder (router/service/repository/schemas) — it should never require touching `core/`.

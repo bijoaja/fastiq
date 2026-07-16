@@ -139,6 +139,9 @@ Berikut adalah konfigurasi environment variables yang didukung oleh FastIQ (dide
 | `PORT` | Port tempat aplikasi FastAPI berjalan. | `8000` |
 | `DATABASE_URL` | String koneksi database SQLAlchemy (wajib asinkron). | `postgresql+asyncpg://...` |
 | `SECRET_KEY` | Kunci rahasia yang digunakan untuk JWT dan operasi kriptografi. | `super-secret-key-change-me` |
+| `JWT_ALGORITHM` | Algoritma yang digunakan untuk enkripsi JWT. | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Waktu kedaluwarsa Access Token dalam menit. | `15` |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | Waktu kedaluwarsa Refresh Token dalam hari. | `7` |
 
 ---
 
@@ -165,6 +168,11 @@ fastiq/
 │   ├── models/             # SEMUA model ORM SQLAlchemy (terpusat untuk memudahkan Alembic)
 │   │   └── user.py         # Model user
 │   ├── modules/            # Modul fitur bisnis (satu subfolder per modul)
+│   │   ├── auth/           # Modul Autentikasi (JWT)
+│   │   │   ├── repository.py # Operasi database untuk token refresh
+│   │   │   ├── router.py   # API Endpoints (Register, Login, Refresh, Logout)
+│   │   │   ├── schemas.py  # Skema request & response autentikasi
+│   │   │   └── service.py  # Logika bisnis autentikasi & manajemen token
 │   │   └── users/          # Modul Users
 │   │       ├── repository.py # Operasi database khusus modul users
 │   │       ├── router.py   # API Endpoints (Hanya HTTP Layer, bebas dari logic)
@@ -244,7 +252,93 @@ Saat Anda mengembangkan aplikasi menggunakan template FastIQ, harap ikuti aturan
 
 ---
 
-## 11. FAQ (Frequently Asked Questions)
+## 11. Autentikasi & Keamanan (JWT Auth)
+
+FastIQ mengimplementasikan sistem autentikasi berbasis JWT (JSON Web Token) dengan menggunakan pasangan Access Token (jangka pendek) dan Refresh Token (jangka panjang yang disimpan di database secara terenkripsi menggunakan SHA-256).
+
+### A. Endpoints Autentikasi
+
+Semua API endpoint autentikasi berada di bawah prefix `/api/auth`:
+
+1. **Register User Baru**
+   * **Endpoint:** `POST /api/auth/register`
+   * **Request Body:**
+     ```json
+     {
+       "email": "user@example.com",
+       "password": "securepassword",
+       "name": "John Doe"
+     }
+     ```
+   * **Response:** Mengembalikan data user yang berhasil didaftarkan (`UserResponse`) terbungkus dalam `ApiResponse`.
+
+2. **Login / Dapatkan Token**
+   * **Endpoint:** `POST /api/auth/login`
+   * **Request Body:**
+     ```json
+     {
+       "email": "user@example.com",
+       "password": "securepassword"
+     }
+     ```
+   * **Response:** Mengembalikan `access_token`, `refresh_token`, `token_type`, dan `expires_in` terbungkus dalam `ApiResponse`.
+
+3. **Refresh Access Token**
+   * **Endpoint:** `POST /api/auth/refresh`
+   * **Request Body:**
+     ```json
+     {
+       "refresh_token": "string_refresh_token_di_sini"
+     }
+     ```
+   * **Response:** Mengembalikan `access_token` baru beserta `refresh_token` baru (token rotation).
+
+4. **Logout**
+   * **Endpoint:** `POST /api/auth/logout`
+   * **Request Body:**
+     ```json
+     {
+       "refresh_token": "string_refresh_token_di_sini"
+     }
+     ```
+   * **Response:** Merevokasi refresh token tersebut di database.
+
+5. **Get Profil Saya (Protected)**
+   * **Endpoint:** `GET /api/users/me`
+   * **Header:** `Authorization: Bearer <access_token>`
+   * **Response:** Mengembalikan profil user yang sedang login.
+
+### B. Pola Proteksi Route (Protected Routes)
+
+Untuk mengamankan route tertentu agar hanya dapat diakses oleh user yang telah terautentikasi, gunakan dependency `get_current_user` di level router:
+
+```python
+from fastapi import APIRouter, Depends
+from app.core.dependencies import get_current_user
+from app.models.user import User
+
+router = APIRouter(prefix="/features")
+
+@router.get("/protected-endpoint")
+async def my_protected_route(
+    current_user: User = Depends(get_current_user)
+):
+    return {"message": f"Hello, {current_user.name}"}
+```
+
+Jika token tidak dilampirkan, salah, atau kedaluwarsa, endpoint secara otomatis mengembalikan HTTP 401 (`UnauthorizedException`) dengan format response error terstandar:
+
+```json
+{
+  "success": false,
+  "message": "Invalid or expired token",
+  "errors": []
+}
+```
+
+---
+
+## 12. FAQ (Frequently Asked Questions)
 
 **T: Mengapa file SQLAlchemy Model tidak diletakkan di dalam modul bisnis (misalnya di `app/modules/users/models.py`)?**
 J: Agar Alembic dapat melacak model database dengan mudah dan menghindari isu *circular imports* saat terdapat relasi *foreign key* antar model yang berbeda modul. Dengan meletakkannya di `app/models/`, pendaftaran model ke metadata SQLAlchemy menjadi tersentralisasi dan rapi.
