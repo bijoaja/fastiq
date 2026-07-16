@@ -18,7 +18,7 @@ def test_create_and_decode_access_token():
     assert payload["sub"] == str(user_id)
 
 def test_decode_access_token_invalid_signature_raises():
-    bad_token = jwt.encode({"sub": "x"}, "wrong-secret", algorithm=settings.JWT_ALGORITHM)
+    bad_token = jwt.encode({"sub": "x"}, "wrong-secret-key-at-least-32-characters-long", algorithm=settings.JWT_ALGORITHM)
     with pytest.raises(UnauthorizedException):
         decode_access_token(bad_token)
 
