@@ -1,0 +1,8 @@
+from pydantic import BaseModel
+
+
+class {{name_title}}Schema(BaseModel):
+    id: int
+
+    class Config:
+        orm_mode = True

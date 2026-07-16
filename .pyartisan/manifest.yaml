@@ -1,0 +1,19 @@
+id: fastiq
+framework: fastapi
+version: 1.0
+
+paths:
+  modules: app/modules
+
+generators:
+  feature:
+    stub: stubs/feature
+    path: modules
+    registration:
+      type: marker
+      target: app/main.py
+      marker: "# pyartisan:routers"
+      line: "from app.modules.{{name_lower}}.router import router as {{name_lower}}_router\napp.include_router({{name_lower}}_router)"
+
+scripts:
+  serve: "uvicorn app.main:app --reload"
