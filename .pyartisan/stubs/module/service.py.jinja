@@ -1,0 +1,18 @@
+import uuid
+from typing import List, Tuple
+from app.core.exceptions import BadRequestException, NotFoundException
+from app.modules.{{name_lower}}.schemas import Create{{name_title}}Request
+from app.modules.{{name_lower}}.repository import {{name_title}}Repository
+
+
+class {{name_title}}Service:
+    def __init__(self, repo: {{name_title}}Repository):
+        self.repo = repo
+
+    async def create_{{name_lower}}(self, request: Create{{name_title}}Request):
+        # TODO: Add your business rules
+        pass
+
+    async def get_{{name_lower}}(self, id: uuid.UUID):
+        # TODO: Add repository queries
+        pass

@@ -1,0 +1,20 @@
+import uuid
+from typing import List, Optional
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.{{name_lower}} import {{name_title}}
+
+
+class {{name_title}}Repository:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def create(self, instance: {{name_title}}) -> {{name_title}}:
+        self.db.add(instance)
+        await self.db.flush()
+        return instance
+
+    async def find_by_id(self, id: uuid.UUID) -> Optional[{{name_title}}]:
+        stmt = select({{name_title}}).where({{name_title}}.id == id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()

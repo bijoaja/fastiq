@@ -7,6 +7,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.responses import ApiResponse
 from app.modules.users.router import router as users_router
 from app.modules.auth.router import router as auth_router
+# pyartisan:module_imports
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,4 +35,5 @@ app.include_router(health_router)
 api_router = APIRouter(prefix="/api")
 api_router.include_router(users_router)
 api_router.include_router(auth_router)
+# pyartisan:modules
 app.include_router(api_router)

@@ -4,16 +4,27 @@ version: 1.0
 
 paths:
   modules: app/modules
+  models: app/models
 
 generators:
-  feature:
-    stub: stubs/feature
+  module:
+    stub: stubs/module
     path: modules
     registration:
-      type: marker
-      target: app/main.py
-      marker: "# pyartisan:routers"
-      line: "from app.modules.{{name_lower}}.router import router as {{name_lower}}_router\napp.include_router({{name_lower}}_router)"
+      - type: marker
+        target: app/main.py
+        marker: "# pyartisan:module_imports"
+        line: "from app.modules.{{name_lower}}.router import router as {{name_lower}}_router"
+      - type: marker
+        target: app/main.py
+        marker: "# pyartisan:modules"
+        line: "api_router.include_router({{name_lower}}_router)"
+  model:
+    stub: stubs/model
+    path: models
+    registration:
+      type: import_list
+      target: "{{path}}/__init__.py"
 
 scripts:
-  serve: "uvicorn app.main:app --reload"
+  serve: "uv run uvicorn app.main:app --reload"

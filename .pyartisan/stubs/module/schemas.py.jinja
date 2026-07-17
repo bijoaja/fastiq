@@ -1,0 +1,17 @@
+from datetime import datetime
+import uuid
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class Create{{name_title}}Request(BaseModel):
+    name: str = Field(min_length=2, max_length=255)
+    # TODO: Add schema request properties
+
+
+class {{name_title}}Response(BaseModel):
+    id: uuid.UUID
+    name: str
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
