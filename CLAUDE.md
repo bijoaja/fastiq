@@ -28,39 +28,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Repository Status & Tech Stack
-
-FastIQ is implemented and configured with the following tech stack:
-- **FastAPI** + **Uvicorn** (REST API)
-- **SQLAlchemy 2.x** (Async engine with `asyncpg` / `aiosqlite` for tests)
-- **Alembic** (Database migrations)
-- **Pydantic v2** + **Pydantic Settings** (Configuration & validation)
-- **Pytest** + **Pytest-Asyncio** (Testing)
-- **uv** (Package & environment manager)
-- **Docker & Docker Compose** (Development & production deployment configurations)
-
----
-
 ## Architecture
 
 The core rule: **models are centralized, business logic is modularized.**
-
-```
-app/
-├── main.py
-├── config/         # settings.py, database.py, logger.py, security.py, constants.py
-├── core/           # exceptions.py, responses.py, pagination.py, dependencies.py, enums.py, middleware.py
-├── models/         # ALL SQLAlchemy ORM models live here (keeps Alembic autodetect and cross-model relations simple)
-├── modules/        # one folder per business feature: users/, auth/, etc.
-│   └── <feature>/
-│       ├── router.py       # HTTP layer only — request in, validate, call service, return response
-│       ├── service.py      # business logic (create/update/etc.)
-│       ├── repository.py   # all DB access (find_by_id, create, etc.)
-│       └── schemas.py      # Pydantic request/response schemas for this module
-├── scripts/        # seed.py, seeders/
-├── templates/      # Jinja templates (e.g. for emails)
-└── tests/          # pytest tests
-```
 
 Strict separation of concerns: **router → service → repository**. Routers never touch the database or contain business rules.
 
