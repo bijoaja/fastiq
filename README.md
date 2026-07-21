@@ -24,7 +24,7 @@ Semua fitur di atas dapat ditambahkan secara mandiri oleh developer sesuai kebut
 
 ---
 
-## 2. Fitur FastIQ (Phase 1 & 2)
+## 2. Fitur FastIQ
 
 * **Arsitektur Modular & Pemisahan Concern:** Struktur bersih yang memisahkan Router, Service, dan Repository.
 * **Model Database Terpusat:** Semua model SQLAlchemy diletakkan di direktori `app/models/` untuk memudahkan auto-deteksi oleh Alembic dan mempermudah relasi antar-model.
