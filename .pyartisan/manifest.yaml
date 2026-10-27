@@ -10,6 +10,7 @@ generators:
   module:
     stub: stubs/module
     path: modules
+    dest: "{{name_lower}}"
     registration:
       - type: marker
         target: app/main.py
