@@ -256,10 +256,18 @@ FastIQ menggunakan **Ruff** untuk linting dan formatting kode:
   uv run ruff format .
   ```
 
+### Type Checking
+
+FastIQ menggunakan **Mypy** (dengan plugin Pydantic) untuk static type checking pada folder `app/`:
+```bash
+uv run mypy
+```
+
 ### Continuous Integration (CI)
 
 FastIQ dilengkapi dengan workflow GitHub Actions (`.github/workflows/ci.yml`) yang berjalan otomatis pada setiap *pull request* dan *push* ke branch `main`. Workflow ini mencakup:
 * Pemeriksaan linting & formatting dengan **Ruff** (`ruff check` dan `ruff format --check`)
+* Static type checking dengan **Mypy** (`mypy`)
 * Verifikasi konsistensi lockfile (`uv lock --check`)
 * Matrix pengujian di OS Ubuntu dengan **Python 3.12** dan **Python 3.14**
 * Isolasi environment mandiri tanpa dependensi pada file `.env` lokal

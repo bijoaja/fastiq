@@ -15,7 +15,7 @@ class RequestIdFilter(logging.Filter):
         return True
 
 
-def setup_logging():
+def setup_logging() -> None:
     """Setup logging configuration."""
     # Ensure logs directory exists
     os.makedirs("logs", exist_ok=True)
