@@ -1,18 +1,21 @@
 import uuid
-from datetime import datetime, timezone
-import pytest
-from fastapi.testclient import TestClient
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-from app.main import app
+import pytest
+from fastapi.testclient import TestClient
+
 from app.core.dependencies import get_user_service
-from app.modules.users.service import UserService
+from app.main import app
 from app.models.user import User
+from app.modules.users.service import UserService
+
 
 @pytest.fixture
 def mock_user_service():
     service = MagicMock(spec=UserService)
     return service
+
 
 @pytest.fixture
 def client(mock_user_service):
@@ -22,6 +25,7 @@ def client(mock_user_service):
         yield test_client
     app.dependency_overrides.clear()
 
+
 def test_health_check(client):
     response = client.get("/health")
     assert response.status_code == 200
@@ -30,24 +34,17 @@ def test_health_check(client):
     assert json_data["message"] == "Success"
     assert json_data["data"] == {"status": "ok"}
 
+
 def test_create_user_success(client, mock_user_service):
     user_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     # Mock service.create_user to return a User model
     mock_user = User(
-        id=user_id,
-        email="john@example.com",
-        name="John Doe",
-        created_at=now,
-        updated_at=now
+        id=user_id, email="john@example.com", name="John Doe", created_at=now, updated_at=now
     )
     mock_user_service.create_user = AsyncMock(return_value=mock_user)
 
-    payload = {
-        "email": "john@example.com",
-        "password": "password123",
-        "name": "John Doe"
-    }
+    payload = {"email": "john@example.com", "password": "password123", "name": "John Doe"}
     response = client.post("/api/users/", json=payload)
     assert response.status_code == 201
 
@@ -58,12 +55,9 @@ def test_create_user_success(client, mock_user_service):
     assert "id" in json_data["data"]
     mock_user_service.create_user.assert_called_once()
 
+
 def test_create_user_validation_error(client):
-    payload = {
-        "email": "not-an-email",
-        "password": "short",
-        "name": ""
-    }
+    payload = {"email": "not-an-email", "password": "short", "name": ""}
     response = client.post("/api/users/", json=payload)
     assert response.status_code == 422
     json_data = response.json()
@@ -75,15 +69,12 @@ def test_create_user_validation_error(client):
     assert "body.password" in fields or "password" in fields
     assert "body.name" in fields or "name" in fields
 
+
 def test_get_user_success(client, mock_user_service):
     user_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     mock_user = User(
-        id=user_id,
-        email="john@example.com",
-        name="John Doe",
-        created_at=now,
-        updated_at=now
+        id=user_id, email="john@example.com", name="John Doe", created_at=now, updated_at=now
     )
     mock_user_service.get_user = AsyncMock(return_value=mock_user)
 
@@ -96,8 +87,10 @@ def test_get_user_success(client, mock_user_service):
     assert json_data["data"]["email"] == "john@example.com"
     mock_user_service.get_user.assert_called_once_with(user_id)
 
+
 def test_get_user_not_found(client, mock_user_service):
     from app.core.exceptions import NotFoundException
+
     user_id = uuid.uuid4()
     mock_user_service.get_user = AsyncMock(side_effect=NotFoundException("User not found"))
 
@@ -107,13 +100,18 @@ def test_get_user_not_found(client, mock_user_service):
     assert json_data["success"] is False
     assert json_data["message"] == "User not found"
 
+
 def test_list_users_success(client, mock_user_service):
     user_id_1 = uuid.uuid4()
     user_id_2 = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     mock_users = [
-        User(id=user_id_1, email="one@example.com", name="User One", created_at=now, updated_at=now),
-        User(id=user_id_2, email="two@example.com", name="User Two", created_at=now, updated_at=now)
+        User(
+            id=user_id_1, email="one@example.com", name="User One", created_at=now, updated_at=now
+        ),
+        User(
+            id=user_id_2, email="two@example.com", name="User Two", created_at=now, updated_at=now
+        ),
     ]
     mock_user_service.list_users = AsyncMock(return_value=(mock_users, 2))
 
@@ -128,6 +126,7 @@ def test_list_users_success(client, mock_user_service):
     assert json_data["pagination"]["total"] == 2
     assert json_data["pagination"]["total_pages"] == 1
     mock_user_service.list_users.assert_called_once_with(1, 10)
+
 
 def test_list_users_validation_error(client):
     # page < 1

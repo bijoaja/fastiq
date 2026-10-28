@@ -1,11 +1,14 @@
 import uuid
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.models.user import User
-from app.modules.users.schemas import CreateUserRequest
 from app.modules.users.repository import UserRepository
+from app.modules.users.schemas import CreateUserRequest
 from app.modules.users.service import UserService
+
 
 @pytest.fixture
 def mock_db_session():
@@ -13,13 +16,16 @@ def mock_db_session():
     session.add = MagicMock()
     return session
 
+
 @pytest.fixture
 def user_repository(mock_db_session):
     return UserRepository(db=mock_db_session)
 
+
 @pytest.fixture
 def user_service(user_repository):
     return UserService(repo=user_repository)
+
 
 @pytest.mark.asyncio
 async def test_repository_create(mock_db_session, user_repository):
@@ -29,6 +35,7 @@ async def test_repository_create(mock_db_session, user_repository):
     assert result == user
     mock_db_session.add.assert_called_once_with(user)
     mock_db_session.flush.assert_awaited_once()
+
 
 @pytest.mark.asyncio
 async def test_repository_find_by_id(mock_db_session, user_repository):
@@ -42,6 +49,7 @@ async def test_repository_find_by_id(mock_db_session, user_repository):
     assert result.id == user_id
     mock_db_session.execute.assert_called_once()
 
+
 @pytest.mark.asyncio
 async def test_repository_find_by_email(mock_db_session, user_repository):
     email = "test@example.com"
@@ -54,15 +62,20 @@ async def test_repository_find_by_email(mock_db_session, user_repository):
     assert result.email == email
     mock_db_session.execute.assert_called_once()
 
+
 @pytest.mark.asyncio
 async def test_repository_list_all(mock_db_session, user_repository):
     mock_result = MagicMock()
-    mock_result.scalars.return_value.all.return_value = [User(email="1@example.com"), User(email="2@example.com")]
+    mock_result.scalars.return_value.all.return_value = [
+        User(email="1@example.com"),
+        User(email="2@example.com"),
+    ]
     mock_db_session.execute.return_value = mock_result
 
     result = await user_repository.list_all(offset=10, limit=5)
     assert len(result) == 2
     mock_db_session.execute.assert_called_once()
+
 
 @pytest.mark.asyncio
 async def test_repository_count_all(mock_db_session, user_repository):
@@ -73,6 +86,7 @@ async def test_repository_count_all(mock_db_session, user_repository):
     result = await user_repository.count_all()
     assert result == 42
     mock_db_session.execute.assert_called_once()
+
 
 @pytest.mark.asyncio
 async def test_service_create_user_success(user_service, user_repository):
@@ -90,9 +104,12 @@ async def test_service_create_user_success(user_service, user_repository):
     user_repository.find_by_email.assert_called_once_with("new@example.com")
     user_repository.create.assert_called_once()
 
+
 @pytest.mark.asyncio
 async def test_service_create_user_already_registered(user_service, user_repository):
-    request = CreateUserRequest(email="existing@example.com", name="New User", password="password123")
+    request = CreateUserRequest(
+        email="existing@example.com", name="New User", password="password123"
+    )
 
     # Mock find_by_email returning an existing user
     user_repository.find_by_email = AsyncMock(return_value=User(email="existing@example.com"))
@@ -105,6 +122,7 @@ async def test_service_create_user_already_registered(user_service, user_reposit
     user_repository.find_by_email.assert_called_once_with("existing@example.com")
     user_repository.create.assert_not_called()
 
+
 @pytest.mark.asyncio
 async def test_service_get_user_success(user_service, user_repository):
     user_id = uuid.uuid4()
@@ -115,6 +133,7 @@ async def test_service_get_user_success(user_service, user_repository):
     assert result == mock_user
     user_repository.find_by_id.assert_called_once_with(user_id)
 
+
 @pytest.mark.asyncio
 async def test_service_get_user_not_found(user_service, user_repository):
     user_id = uuid.uuid4()
@@ -124,6 +143,7 @@ async def test_service_get_user_not_found(user_service, user_repository):
         await user_service.get_user(user_id)
 
     user_repository.find_by_id.assert_called_once_with(user_id)
+
 
 @pytest.mark.asyncio
 async def test_service_list_users(user_service, user_repository):

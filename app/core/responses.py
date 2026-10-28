@@ -1,12 +1,15 @@
-from typing import Generic, TypeVar, List, Optional
+from typing import TypeVar
+
 from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
-class ApiResponse(BaseModel, Generic[T]):
+
+class ApiResponse[T](BaseModel):
     success: bool = True
     message: str = "Success"
     data: T
+
 
 class PaginationInfo(BaseModel):
     page: int
@@ -14,17 +17,20 @@ class PaginationInfo(BaseModel):
     total: int
     total_pages: int
 
-class ApiListResponse(BaseModel, Generic[T]):
+
+class ApiListResponse[T](BaseModel):
     success: bool = True
     message: str = "Success"
-    data: List[T]
+    data: list[T]
     pagination: PaginationInfo
 
+
 class ErrorDetail(BaseModel):
-    field: Optional[str] = None
+    field: str | None = None
     message: str
+
 
 class ApiErrorResponse(BaseModel):
     success: bool = False
     message: str
-    errors: List[ErrorDetail] = Field(default_factory=list)
+    errors: list[ErrorDetail] = Field(default_factory=list)

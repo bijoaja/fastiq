@@ -1,11 +1,13 @@
 import uuid
 from datetime import datetime
+
 import pytest
 from pydantic import ValidationError
+
 from app.config.security import hash_password, verify_password
 from app.models.user import User
-from app.utils.uuid import generate_uuid7
 from app.modules.users.schemas import CreateUserRequest, UserResponse
+
 
 def test_password_security():
     password = "secret_password"
@@ -13,6 +15,7 @@ def test_password_security():
     assert hashed != password
     assert verify_password(password, hashed) is True
     assert verify_password("wrong_password", hashed) is False
+
 
 def test_create_user_request_valid():
     data = {
@@ -25,6 +28,7 @@ def test_create_user_request_valid():
     assert req.password == "secure123"
     assert req.name == "John Doe"
 
+
 def test_create_user_request_invalid_email():
     with pytest.raises(ValidationError):
         CreateUserRequest(
@@ -32,6 +36,7 @@ def test_create_user_request_invalid_email():
             password="secure123",
             name="John Doe",
         )
+
 
 def test_create_user_request_invalid_password_length():
     with pytest.raises(ValidationError):
@@ -41,6 +46,7 @@ def test_create_user_request_invalid_password_length():
             name="John Doe",
         )
 
+
 def test_create_user_request_invalid_name_length():
     with pytest.raises(ValidationError):
         CreateUserRequest(
@@ -48,6 +54,7 @@ def test_create_user_request_invalid_name_length():
             password="secure123",
             name="J",
         )
+
 
 def test_user_response():
     user_id = uuid.uuid4()
@@ -65,6 +72,7 @@ def test_user_response():
     assert res.name == "John Doe"
     assert res.created_at == now
     assert res.updated_at == now
+
 
 def test_user_response_from_orm():
     user_id = uuid.uuid4()
@@ -86,6 +94,7 @@ def test_user_response_from_orm():
     assert res.created_at == now
     assert res.updated_at == now
 
+
 def test_user_model_initialization():
     user = User(
         email="user@example.com",
@@ -96,5 +105,3 @@ def test_user_model_initialization():
     assert user.hashed_password == "hashed_password_string"
     assert user.name == "John Doe"
     assert User.id.default.arg.__name__ == "generate_uuid7"
-
-

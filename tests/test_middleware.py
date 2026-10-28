@@ -1,12 +1,13 @@
-import logging
 import os
 import uuid
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-import pytest
-from app.utils.uuid import generate_uuid7
-from app.config.logger import setup_logging, request_id_ctx
+
+from app.config.logger import request_id_ctx, setup_logging
 from app.core.middleware import RequestLoggingMiddleware
+from app.utils.uuid import generate_uuid7
+
 
 def test_uuid7_generation():
     # Test generation and type
@@ -14,6 +15,7 @@ def test_uuid7_generation():
     assert isinstance(val, uuid.UUID)
     # UUIDv7 starts with version 7
     assert val.version == 7
+
 
 def test_request_logging_middleware(capsys):
     # Setup FastAPI app
@@ -43,7 +45,7 @@ def test_request_logging_middleware(capsys):
     assert req_id in captured.err
 
     assert os.path.exists("logs/app.log")
-    with open("logs/app.log", "r") as f:
+    with open("logs/app.log") as f:
         lines = f.readlines()
         assert any(req_id in line for line in lines)
         assert any("Method: GET | Path: /test" in line for line in lines)
@@ -60,7 +62,7 @@ def test_request_logging_middleware(capsys):
     assert "Method: GET | Path: /test" in captured2.err
     assert custom_id in captured2.err
 
-    with open("logs/app.log", "r") as f:
+    with open("logs/app.log") as f:
         lines = f.readlines()
         assert any(custom_id in line for line in lines)
         assert any("Method: GET | Path: /test" in line for line in lines)

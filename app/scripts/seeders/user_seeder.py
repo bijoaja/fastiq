@@ -1,10 +1,13 @@
 import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.config.security import hash_password
 from app.models.user import User
 from app.modules.users.repository import UserRepository
-from app.config.security import hash_password
 
 logger = logging.getLogger(__name__)
+
 
 async def seed_users(db: AsyncSession) -> None:
     repo = UserRepository(db)

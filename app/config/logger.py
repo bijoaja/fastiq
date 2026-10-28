@@ -6,11 +6,14 @@ from contextvars import ContextVar
 # ContextVar to store request_id per-thread/async-task context
 request_id_ctx: ContextVar[str] = ContextVar("request_id", default="-")
 
+
 class RequestIdFilter(logging.Filter):
     """Filter to inject request_id into each log record."""
+
     def filter(self, record: logging.LogRecord) -> bool:
         record.request_id = request_id_ctx.get()
         return True
+
 
 def setup_logging():
     """Setup logging configuration."""
