@@ -15,10 +15,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Rollback last migration: `uv run alembic downgrade -1`
 - Seed database: `uv run python app/scripts/seed.py`
 
-### Testing
+### Testing & Quality Checks
 - Run all tests: `uv run pytest`
 - Run with verbose output: `uv run pytest -v`
 - Run specific test file: `uv run pytest tests/test_smoke.py`
+- Linting: `uv run ruff check .`
+- Auto-fix linting: `uv run ruff check --fix .`
+- Formatting check: `uv run ruff format --check .`
+- Format code: `uv run ruff format .`
+- Type checking: `uv run mypy`
+- Security scan: `uv run bandit -q -r app -c pyproject.toml`
 
 ### Docker
 - Run development stack (Postgres + API dev with hot-reload & volume mount):
@@ -33,6 +39,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The core rule: **models are centralized, business logic is modularized.**
 
 Strict separation of concerns: **router → service → repository**. Routers never touch the database or contain business rules.
+
+---
+
+## Documentation
+
+FastIQ documentation is bilingual:
+- English: `docs/en/` + `README.md`
+- Indonesian: `docs/id/` + `README.id.md`
+
+Key docs:
+- `GETTING_STARTED.md` — installation, running locally/Docker, env vars
+- `ARCHITECTURE.md` — project structure, patterns, best practices, Alembic migrations
+- `TESTING.md` — pytest, ruff, mypy, bandit, CI workflow
+- `AUTHENTICATION.md` — JWT endpoints, protected route pattern
+- `FAQ.md` — common questions
+- `CONTRIBUTING.md` — contributor workflow, code rules, testing
+
+When updating documentation: change both EN and ID versions in the same PR. Commands, file names, and field names are not translated.
 
 ---
 

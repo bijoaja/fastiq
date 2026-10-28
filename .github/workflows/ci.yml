@@ -36,6 +36,9 @@ jobs:
       - name: Mypy Type Check
         run: uv run mypy
 
+      - name: Bandit Security Scan
+        run: uv run bandit -q -r app -c pyproject.toml
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
