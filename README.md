@@ -236,9 +236,30 @@ FastIQ menggunakan **Pytest** dengan database SQLite in-memory (`aiosqlite`) unt
 
 Konfigurasi pengujian diatur pada `tests/conftest.py` yang menyediakan fixture untuk database in-memory asinkron dan client HTTP asinkron.
 
+### Linting & Formatting
+
+FastIQ menggunakan **Ruff** untuk linting dan formatting kode:
+* **Periksa linting:**
+  ```bash
+  uv run ruff check .
+  ```
+* **Perbaiki linting otomatis:**
+  ```bash
+  uv run ruff check --fix .
+  ```
+* **Periksa formatting:**
+  ```bash
+  uv run ruff format --check .
+  ```
+* **Format kode otomatis:**
+  ```bash
+  uv run ruff format .
+  ```
+
 ### Continuous Integration (CI)
 
 FastIQ dilengkapi dengan workflow GitHub Actions (`.github/workflows/ci.yml`) yang berjalan otomatis pada setiap *pull request* dan *push* ke branch `main`. Workflow ini mencakup:
+* Pemeriksaan linting & formatting dengan **Ruff** (`ruff check` dan `ruff format --check`)
 * Verifikasi konsistensi lockfile (`uv lock --check`)
 * Matrix pengujian di OS Ubuntu dengan **Python 3.12** dan **Python 3.14**
 * Isolasi environment mandiri tanpa dependensi pada file `.env` lokal

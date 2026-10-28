@@ -1,9 +1,12 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
+
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.config.database import Base
 from app.utils.uuid import generate_uuid7
+
 
 class User(Base):
     __tablename__ = "users"

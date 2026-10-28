@@ -1,20 +1,22 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
-import pytest
-from app.core.responses import ApiResponse, ApiListResponse, ApiErrorResponse
-from app.core.pagination import build_pagination_info
+
 from app.core.exceptions import (
-    register_exception_handlers,
-    NotFoundException,
     BadRequestException,
+    NotFoundException,
+    register_exception_handlers,
 )
+from app.core.pagination import build_pagination_info
+from app.core.responses import ApiResponse
+
 
 def test_responses():
     res = ApiResponse(data="test data")
     assert res.success is True
     assert res.message == "Success"
     assert res.data == "test data"
+
 
 def test_pagination():
     info = build_pagination_info(page=2, per_page=10, total=25)
@@ -23,9 +25,11 @@ def test_pagination():
     assert info.total == 25
     assert info.total_pages == 3
 
+
 class DummyBody(BaseModel):
     name: str
     age: int
+
 
 def test_exception_handlers():
     app = FastAPI()
@@ -88,6 +92,7 @@ def test_exception_handlers():
     # 5. Test Generic Exception (500)
     # Turn off debug mode in settings mock if necessary, but with DEBUG=true we get the exact error message
     from app.config.settings import settings
+
     original_debug = settings.DEBUG
     try:
         settings.DEBUG = False

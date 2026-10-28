@@ -1,8 +1,10 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.scripts.seeders.user_seeder import seed_users
+
 from app.config.security import verify_password
 from app.modules.users.repository import UserRepository
+from app.scripts.seeders.user_seeder import seed_users
+
 
 @pytest.mark.asyncio
 async def test_seed_users_success(db: AsyncSession):

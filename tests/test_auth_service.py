@@ -1,12 +1,13 @@
 import uuid
-from datetime import datetime, timezone
-import pytest
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
-from app.core.exceptions import UnauthorizedException
+import pytest
+
 from app.config.security import hash_password
-from app.models.user import User
+from app.core.exceptions import UnauthorizedException
 from app.models.refresh_token import RefreshToken
+from app.models.user import User
 from app.modules.auth.schemas import LoginRequest
 from app.modules.auth.service import AuthService
 from app.modules.users.schemas import CreateUserRequest
@@ -44,13 +45,20 @@ async def test_register_delegates_to_user_service(auth_service, mock_user_repo):
 @pytest.mark.asyncio
 async def test_login_success_returns_token_pair(auth_service, mock_user_repo, mock_auth_repo):
     user_id = uuid.uuid4()
-    user = User(id=user_id, email="user@example.com", name="User", hashed_password=hash_password("password123"))
+    user = User(
+        id=user_id,
+        email="user@example.com",
+        name="User",
+        hashed_password=hash_password("password123"),
+    )
     mock_user_repo.find_by_email = AsyncMock(return_value=user)
     mock_auth_repo.create_refresh_token = AsyncMock(
-        return_value=RefreshToken(user_id=user_id, token_hash="h", expires_at=datetime.now(timezone.utc))
+        return_value=RefreshToken(user_id=user_id, token_hash="h", expires_at=datetime.now(UTC))
     )
 
-    result = await auth_service.login(LoginRequest(email="user@example.com", password="password123"))
+    result = await auth_service.login(
+        LoginRequest(email="user@example.com", password="password123")
+    )
 
     assert result.access_token
     assert result.refresh_token
@@ -60,7 +68,9 @@ async def test_login_success_returns_token_pair(auth_service, mock_user_repo, mo
 
 @pytest.mark.asyncio
 async def test_login_wrong_password_raises_unauthorized(auth_service, mock_user_repo):
-    user = User(email="user@example.com", name="User", hashed_password=hash_password("correct-password"))
+    user = User(
+        email="user@example.com", name="User", hashed_password=hash_password("correct-password")
+    )
     mock_user_repo.find_by_email = AsyncMock(return_value=user)
 
     with pytest.raises(UnauthorizedException, match="Invalid credentials"):
@@ -76,16 +86,22 @@ async def test_login_unknown_email_raises_unauthorized(auth_service, mock_user_r
 
 
 @pytest.mark.asyncio
-async def test_refresh_valid_token_rotates_and_returns_new_pair(auth_service, mock_user_repo, mock_auth_repo):
+async def test_refresh_valid_token_rotates_and_returns_new_pair(
+    auth_service, mock_user_repo, mock_auth_repo
+):
     user_id = uuid.uuid4()
-    old_token = RefreshToken(user_id=user_id, token_hash="old-hash", expires_at=datetime.now(timezone.utc))
+    old_token = RefreshToken(user_id=user_id, token_hash="old-hash", expires_at=datetime.now(UTC))
     mock_auth_repo.find_valid_by_hash = AsyncMock(return_value=old_token)
     mock_auth_repo.revoke = AsyncMock()
     mock_auth_repo.create_refresh_token = AsyncMock(
-        return_value=RefreshToken(user_id=user_id, token_hash="new-hash", expires_at=datetime.now(timezone.utc))
+        return_value=RefreshToken(
+            user_id=user_id, token_hash="new-hash", expires_at=datetime.now(UTC)
+        )
     )
     mock_user_repo.find_by_id = AsyncMock(
-        return_value=User(id=user_id, email="user@example.com", name="User", hashed_password="hashed")
+        return_value=User(
+            id=user_id, email="user@example.com", name="User", hashed_password="hashed"
+        )
     )
 
     result = await auth_service.refresh("some-raw-refresh-token")
@@ -106,7 +122,7 @@ async def test_refresh_invalid_token_raises_unauthorized(auth_service, mock_auth
 
 @pytest.mark.asyncio
 async def test_logout_revokes_existing_token(auth_service, mock_auth_repo):
-    token_row = RefreshToken(user_id=uuid.uuid4(), token_hash="h", expires_at=datetime.now(timezone.utc))
+    token_row = RefreshToken(user_id=uuid.uuid4(), token_hash="h", expires_at=datetime.now(UTC))
     mock_auth_repo.find_valid_by_hash = AsyncMock(return_value=token_row)
     mock_auth_repo.revoke = AsyncMock()
 

@@ -1,14 +1,18 @@
 import logging
 import time
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+
 from app.config.logger import request_id_ctx
 from app.utils.uuid import generate_uuid7
 
 logger = logging.getLogger(__name__)
 
+
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for logging requests, injecting request_id, and timing."""
+
     async def dispatch(self, request: Request, call_next) -> Response:
         # Get request ID from header or generate new one
         request_id = request.headers.get("X-Request-ID")

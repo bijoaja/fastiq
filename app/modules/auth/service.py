@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.config.security import (
     create_access_token,
@@ -52,8 +52,10 @@ class AuthService:
     async def _issue_tokens(self, user: User) -> TokenResponse:
         access_token = create_access_token(user.id)
         raw_refresh_token = generate_refresh_token()
-        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
-        await self.auth_repo.create_refresh_token(user.id, hash_token(raw_refresh_token), expires_at)
+        expires_at = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        await self.auth_repo.create_refresh_token(
+            user.id, hash_token(raw_refresh_token), expires_at
+        )
 
         return TokenResponse(
             access_token=access_token,

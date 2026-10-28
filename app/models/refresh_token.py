@@ -1,10 +1,12 @@
 import uuid
 from datetime import datetime
-from typing import Optional
+
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
+
 from app.config.database import Base
 from app.utils.uuid import generate_uuid7
+
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
@@ -28,7 +30,7 @@ class RefreshToken(Base):
         DateTime(timezone=True),
         nullable=False,
     )
-    revoked_at: Mapped[Optional[datetime]] = mapped_column(
+    revoked_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
         default=None,

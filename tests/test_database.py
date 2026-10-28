@@ -1,12 +1,16 @@
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.config.database import engine, async_session, Base, get_db
+
+from app.config.database import Base, async_session, engine, get_db
+
 
 def test_database_components():
     assert engine is not None
     assert async_session is not None
     assert issubclass(Base, object)
+
 
 @pytest.mark.asyncio
 async def test_get_db_success():
@@ -26,6 +30,7 @@ async def test_get_db_success():
 
         mock_session.commit.assert_awaited_once()
         mock_session.rollback.assert_not_awaited()
+
 
 @pytest.mark.asyncio
 async def test_get_db_exception():

@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
+
 @pytest.mark.asyncio
 async def test_smoke_flow(client: AsyncClient):
     # 1. Uji endpoint /health
@@ -12,11 +13,7 @@ async def test_smoke_flow(client: AsyncClient):
     assert res_data["data"] == {"status": "ok"}
 
     # 2. Uji POST /api/users/
-    payload = {
-        "email": "smoke_test@example.com",
-        "password": "password123",
-        "name": "Smoke User"
-    }
+    payload = {"email": "smoke_test@example.com", "password": "password123", "name": "Smoke User"}
     response = await client.post("/api/users/", json=payload)
     assert response.status_code == 201
     res_data = response.json()
