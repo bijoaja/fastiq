@@ -71,9 +71,25 @@ jobs:
       - name: Run tests
         run: uv run pytest -q -p no:cacheprovider
 
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: pip-audit (CVE scan)
+        continue-on-error: true
+        run: |
+          uv export --frozen --no-emit-project --no-hashes -o requirements-audit.txt
+          uvx pip-audit -r requirements-audit.txt --no-deps --disable-pip
+
   ci-ok:
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [lint, test, audit]
     if: always()
     steps:
       - name: Verify test status
