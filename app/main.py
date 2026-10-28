@@ -1,3 +1,4 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
@@ -14,7 +15,7 @@ from app.modules.users.router import router as users_router
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     setup_logging()
     yield
 

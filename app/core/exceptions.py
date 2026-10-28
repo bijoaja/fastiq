@@ -91,8 +91,10 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    app.add_exception_handler(AppException, app_exception_handler)
-    app.add_exception_handler(RequestValidationError, validation_exception_handler)
-    app.add_exception_handler(StarletteHTTPException, http_exception_handler)
-    app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
+    # Starlette types handlers as taking `Exception`; Starlette only dispatches each handler for
+    # its registered exception class, so the narrower parameter types below are safe.
+    app.add_exception_handler(AppException, app_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, global_exception_handler)
