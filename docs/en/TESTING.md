@@ -64,6 +64,15 @@ uv run bandit -q -r app -c pyproject.toml
 ```
 Every `# nosec` comment must include a written reason on the same line.
 
+### Dependency CVE scan (SCA)
+
+Bandit only scans your own code. To check dependencies for known CVEs, use **pip-audit** against the lockfile:
+```bash
+uv export --frozen --no-emit-project --no-hashes -o requirements-audit.txt
+uvx pip-audit -r requirements-audit.txt --no-deps --disable-pip
+```
+In CI this runs as the separate `audit` job. It is **non-blocking** (`continue-on-error`) and `ci-ok` does not require it, so a newly published CVE does not fail unrelated PRs. Check the job result regularly and bump the affected dependency (commit `uv.lock`). **Dependabot** (`.github/dependabot.yml`) also opens weekly update PRs for `uv` dependencies and GitHub Actions.
+
 ---
 
 ## 5. Continuous Integration (CI)
@@ -72,6 +81,7 @@ FastIQ includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs
 * Code linting & formatting checks with **Ruff** (`ruff check` and `ruff format --check`)
 * Static type checking with **Mypy** (`mypy`)
 * Code security scanning with **Bandit**
+* Dependency CVE scan with **pip-audit** (`audit` job, non-blocking)
 * Lockfile consistency verification (`uv lock --check`)
 * Test matrix on Ubuntu with **Python 3.12** and **Python 3.14**
 * Isolated environment without relying on local `.env` file
