@@ -17,7 +17,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: astral-sh/setup-uv@v5
         with:
@@ -50,7 +50,7 @@ jobs:
       DATABASE_URL: "sqlite+aiosqlite:///:memory:"
       SECRET_KEY: "ci-secret-key-for-testing-only-do-not-use-in-production"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Remove tracked .env to prevent leakage
         run: rm -f .env
@@ -74,7 +74,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: astral-sh/setup-uv@v5
         with:
