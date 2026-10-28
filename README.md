@@ -1,5 +1,7 @@
 # FastIQ — Starter Kit & Project Template FastAPI yang Terstruktur dan Opiniated
 
+[![CI](https://github.com/bijoaja/fastiq/actions/workflows/ci.yml/badge.svg)](https://github.com/bijoaja/fastiq/actions/workflows/ci.yml)
+
 FastIQ adalah sebuah template proyek (starter kit) berbasis **FastAPI** yang dirancang untuk mempercepat pembuatan REST API siap produksi dengan arsitektur yang bersih, modular, dan terstruktur dengan baik. FastIQ terinspirasi dari filosofi **FlaskIQ** dan dirancang khusus untuk memenuhi standar kebersihan kode dan pemisahan tanggung jawab (*Separation of Concerns*) yang ketat.
 
 ---
@@ -233,6 +235,13 @@ FastIQ menggunakan **Pytest** dengan database SQLite in-memory (`aiosqlite`) unt
   ```
 
 Konfigurasi pengujian diatur pada `tests/conftest.py` yang menyediakan fixture untuk database in-memory asinkron dan client HTTP asinkron.
+
+### Continuous Integration (CI)
+
+FastIQ dilengkapi dengan workflow GitHub Actions (`.github/workflows/ci.yml`) yang berjalan otomatis pada setiap *pull request* dan *push* ke branch `main`. Workflow ini mencakup:
+* Verifikasi konsistensi lockfile (`uv lock --check`)
+* Matrix pengujian di OS Ubuntu dengan **Python 3.12** dan **Python 3.14**
+* Isolasi environment mandiri tanpa dependensi pada file `.env` lokal
 
 ---
 
