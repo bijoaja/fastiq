@@ -43,7 +43,11 @@ async def get_current_user(
     if not token:
         raise UnauthorizedException("Not authenticated")
     payload = decode_access_token(token)
-    user = await repo.find_by_id(uuid.UUID(payload["sub"]))
+    try:
+        user_id = uuid.UUID(str(payload["sub"]))
+    except (KeyError, ValueError):
+        raise UnauthorizedException("Invalid or expired token")
+    user = await repo.find_by_id(user_id)
     if not user:
         raise UnauthorizedException("User not found")
     return user

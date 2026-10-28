@@ -52,3 +52,27 @@ def test_hash_token_is_deterministic_sha256_hex():
     digest = hash_token(token)
     assert len(digest) == 64
     assert digest == hash_token(token)
+
+
+def test_get_current_user_malformed_sub_returns_401():
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+
+    token = jwt.encode(
+        {"sub": "not-a-uuid", "exp": int(time.time()) + 60},
+        settings.SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+    with TestClient(app) as client:
+        response = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 401
+
+
+def test_settings_rejects_short_secret_key():
+    from pydantic import ValidationError
+
+    from app.config.settings import Settings
+
+    with pytest.raises(ValidationError):
+        Settings(DATABASE_URL="sqlite+aiosqlite:///:memory:", SECRET_KEY="short")
