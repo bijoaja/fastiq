@@ -32,7 +32,7 @@
 **Interfaces:**
 - Consumes: skema `scripts.analyze` dari plan pyartisan Task 5: list `{name, cmd, fix?}`.
 
-- [ ] **Step 1: Edit blok `scripts`** menjadi:
+- [x] **Step 1: Edit blok `scripts`** menjadi:
 ```yaml
 scripts:
   serve: "uv run uvicorn app.main:app --reload"
@@ -43,17 +43,17 @@ scripts:
     - {name: mypy, cmd: "uv run mypy"}
 ```
   Catatan: key `fix` ditambah di plan ini (tidak ada di spec template). Update spec agar sinkron.
-- [ ] **Step 2: Validasi YAML:** `python -c "import yaml;print(len(yaml.safe_load(open('.pyartisan/manifest.yaml'))['scripts']['analyze']))"` -> `4`.
-- [ ] **Step 3: Uji:** `uv sync` lalu `pyartisan analyze` -> semua `✔`, exit 0. `pyartisan analyze --fix` -> tidak mengubah file bersih.
-- [ ] **Step 4: Uji serve:** `pyartisan serve --uv` -> uvicorn naik di port 8000.
-- [ ] **Step 5: Regresi:** `pyartisan make module demo` di salinan sementara -> berhasil.
-- [ ] **Step 6: Commit** `git add .pyartisan/manifest.yaml docs/superpowers && git commit -m "feat(manifest): add analyze steps"`
+- [x] **Step 2: Validasi YAML:** `python -c "import yaml;print(len(yaml.safe_load(open('.pyartisan/manifest.yaml'))['scripts']['analyze']))"` -> `4`.
+- [x] **Step 3: Uji:** `uv sync` lalu `pyartisan analyze` -> semua `✔`, exit 0. `pyartisan analyze --fix` -> tidak mengubah file bersih.
+- [x] **Step 4: Uji serve:** `pyartisan serve --uv` -> uvicorn naik di port 8000.
+- [x] **Step 5: Regresi:** `pyartisan make module demo` di salinan sementara -> berhasil.
+- [x] **Step 6: Commit** `git add .pyartisan/manifest.yaml docs/superpowers && git commit -m "feat(manifest): add analyze steps"`
 
 ### Task 2: Verifikasi bandit CI dan cakupan
 
 **Files:**
 - Modify: `.github/workflows/ci.yml` dan `.pyartisan/manifest.yaml` (hanya jika scope diperluas)
 
-- [ ] **Step 1:** `grep -n "bandit" .github/workflows/ci.yml` -> step `bandit -q -r app -c pyproject.toml` ada di job `lint`.
-- [ ] **Step 2:** Cek kode Python di luar `app/` (selain `tests`, `alembic`, yang dikecualikan `[tool.bandit]`): `git ls-files "*.py" | grep -v "^app/\|^tests/\|^alembic/"`. Ada kode produksi -> perluas `-r app <path>` di CI dan manifest bersamaan. Tidak ada -> tidak ada perubahan.
-- [ ] **Step 3:** Jika berubah: `git commit -m "ci: widen bandit scope"`.
+- [x] **Step 1:** `grep -n "bandit" .github/workflows/ci.yml` -> step `bandit -q -r app -c pyproject.toml` ada di job `lint`.
+- [x] **Step 2:** Cek kode Python di luar `app/` (selain `tests`, `alembic`, yang dikecualikan `[tool.bandit]`): `git ls-files "*.py" | grep -v "^app/\|^tests/\|^alembic/"`. Ada kode produksi -> perluas `-r app <path>` di CI dan manifest bersamaan. Tidak ada -> tidak ada perubahan.
+- [x] **Step 3:** Jika berubah: `git commit -m "ci: widen bandit scope"`. (Tidak ada perubahan, cakupan app/ sudah tepat).
