@@ -29,3 +29,8 @@ generators:
 
 scripts:
   serve: "uv run uvicorn app.main:app --reload"
+  analyze:
+    - {name: ruff-check, cmd: "uv run ruff check .", fix: "uv run ruff check --fix ."}
+    - {name: ruff-format, cmd: "uv run ruff format --check .", fix: "uv run ruff format ."}
+    - {name: bandit, cmd: "uv run bandit -q -r app -c pyproject.toml"}
+    - {name: mypy, cmd: "uv run mypy"}
