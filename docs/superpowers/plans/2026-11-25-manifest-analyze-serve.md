@@ -8,7 +8,7 @@
 
 **Tech Stack:** YAML manifest, uv, ruff, bandit, mypy.
 
-**Spec:** `docs/superpowers/specs/2026-11-25-manifest-check-serve-design.md` (akan di-rename ke `...-analyze-serve-design.md`).
+**Spec:** `docs/superpowers/specs/2026-11-25-manifest-analyze-serve-design.md`.
 
 ## Global Constraints
 - Perintah dari job `lint` di `.github/workflows/ci.yml`, semua lewat `uv run`: `ruff check .`, `ruff format --check .`, `bandit -q -r app -c pyproject.toml`, `mypy`.
